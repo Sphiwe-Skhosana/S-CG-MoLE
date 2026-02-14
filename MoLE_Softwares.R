@@ -53,12 +53,7 @@ GMLRs.fit=function(y,x,k=2,init.pi=NULL,init.beta=NULL,init.sigma=NULL){
   if(!is.null(init.pi)){init.pi=init.pi}else{init.pi=rep(1/k,k)}
   
   fit_mlr <- regmixEM(y, x, k = k,beta=init.beta,sigma=init.sigma,lambda = init.pi)
-  if (fit_mlr$beta[1, 1] > fit_mlr$beta[1, 2]) {
-    fit_mlr$lambda <- fit_mlr$lambda[2:1]
-    fit_mlr$beta <- fit_mlr$beta[, 2:1]
-    fit_mlr$sigma <- fit_mlr$sigma[2:1]
-    fit_mlr$posterior <- fit_mlr$posterior[,2:1]
-  }
+
   df=k*(3+nrow(fit_mlr$beta))+(k-1)
   loglik=fit_mlr$loglik
   # Information criteria
@@ -182,14 +177,7 @@ CGMLRs.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, init.pi=NULL,ini
   df=k*(ncol(beta_new)+3)+k-1
   AIC <- -2 * loglik + 2*df
   BIC <- -2 * loglik + log(n) * df
-  if (beta_new[1, 1] > beta_new[1, 2]) {
-    pi_new <- pi_new[2:1]
-    beta_new <- beta_new[,2:1]
-    sigma_new <- sigma_new[2:1]
-    eta_new <- eta_new[2:1]
-    alpha_new <- alpha_new[2:1]
-    z<- z[,2:1]
-  }
+
   out=list(pi = pi_new, beta = beta_new, sigma = sigma_new,
            alpha = alpha_new, AIC=AIC, BIC=BIC, eta = eta_new, loglik = loglik, z=z)
   return(out)
@@ -202,13 +190,6 @@ GMoLE.fit=function(x,y,k=NULL,init.pi=NULL,init.beta=NULL,init.sigma=NULL){
   if(!is.null(init.sigma)){init.sigma=init.sigma}else{init.sigma=rgamma(k,1,1)}
   fit_mle <- hmeEM(x = x, y = y, k = k, lambda=init.pi[,1],beta = init.beta,sigma=init.sigma)
   ##Reorder
-  if (fit_mle$beta[1, 1] > fit_mle$beta[1, 2]) {
-    fit_mle$lambda <- fit_mle$lambda[,2:1]
-    fit_mle$sigma <- fit_mle$sigma[2:1]
-    fit_mle$beta <- fit_mle$beta[,2:1]
-    fit_mle$w<- -fit_mle$w
-    fit_mle$posterior <- fit_mle$posterior[,2:1]
-  }
   num_params_mle <- k*(nrow(fit_mle$beta)+1)+(k-1)*length(fit_mle$w)
   loglik=fit_mle$loglik
   
@@ -337,16 +318,6 @@ CGMoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FALSE,
   dens <- cbind(comp_density(1), comp_density(2))
   z <- (pix * dens) / rowSums(pix * dens)
   
-  if (beta[1, 1] > beta[1, 2]) {
-    pix <- pix[,2:1]
-    beta <- beta[,2:1]
-    sigma <- sigma[2:1]
-    eta <- eta[2:1]
-    alpha <- alpha[2:1]
-    gamma<-gamma[2:1,]
-    z<-z[,2:1]
-  }
-  
   df <- k*(ncol(beta)+3) + (k-1)*ncol(gamma)
   
   AIC <- -2 * ll + 2 * df
@@ -443,12 +414,6 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
   BIC_val <- -2 * loglik + log(n) * df
   
   sigma1=sigma0
-  ##Reorder
-  if (Beta1[1, 1] > Beta1[1, 2]) {
-    pi_x <- pi_x[,2:1]
-    Beta1 <- Beta1[,2:1]
-    sigma1 <- sigma1[2:1]
-  }
   
   g <- sapply(1:K, function(k) {
     pi_x[, k] * dnorm(y, mean = z %*% Beta1[, k], sd = sigma1[k])
@@ -580,15 +545,6 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
   
   AIC_val <- -2 * loglik + 2 * df
   BIC_val <- -2 * loglik + log(n) * df
-  
-  if (beta[1, 1] > beta[1, 2]) {
-    pi_x <- pi_x[,2:1]
-    beta <- beta[,2:1]
-    sigma <- sigma[2:1]
-    eta <- eta[2:1]
-    alpha <- alpha[2:1]
-    z<- z[,2:1]
-  }
   
   out=list(beta = beta,
            sigma = sigma,
