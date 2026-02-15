@@ -311,7 +311,7 @@ CGMoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FALSE,
 }
 
 ####S-GMoLE####
-S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,init.sigma=NULL,init.eta=NULL,init.alpha=NULL) {
+S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,init.sigma=NULL) {
   n <- length(y)
   z <- cbind(1, x)  # design matrix
   p <- ncol(z)
@@ -376,9 +376,7 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
     sigma0 <- sqrt(sigma21)
   }
   
-  # Compute AIC/BIC
-  # ---------- Compute AIC, BIC with effective df ----------
-  # Parametric parameter count: beta (2*K), sigma (K), alpha (K), eta (K)
+  # Compute BIC
   n_params <- K*(nrow(Beta1)+1)
   
   # Effective nonparametric parameters
@@ -477,13 +475,8 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
       zn=z[,k]
       temp_data=data.frame(y=zn,x=x)
       mod=nnet(y~x,data=temp_data,size=2,decay=0.01,linout=T,trace=F)
-      #mod=randomForest(y~x,data=temp_data)
-      #bw <- np::npregbw(y ~ x , data = temp_data, regtype = "ll")
-      #model <- np::npreg(bws = bw)
-      #pi_x=cbind(pi_x,model$mean)
       pi_x=cbind(pi_x,predict(mod,temp_data))
     }
-    #sapply(1:K, function(k) local_linear_smoother(x, z[,k], x, h))
     pi_x <- pi_x / rowSums(pi_x)
     pi_x[is.na(pi_x)] <- 1/K
     
@@ -535,4 +528,5 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
            iterations = iter,AIC=AIC_val,BIC=BIC_val)
   return(out)
 }
+
 
