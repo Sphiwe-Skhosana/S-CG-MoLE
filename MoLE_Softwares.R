@@ -318,7 +318,7 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
   t <- x
   
   # initialize
-  pi0 <- init.pi
+  if(!is.null(init.pi)){pi_x=init.pi}else{pi_x=matrix(1/K,n,K)}
   if(!is.null(init.beta)){beta=init.beta}else{beta=matrix(rnorm(K*p),p,K)}  # intercept, slope
   if(!is.null(init.sigma)){sigma=init.sigma}else{sigma=rgamma(k,1,1)}
   
@@ -327,7 +327,7 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
   for (iter in 1:max_iter) {
     # --- E-step ---
     r0 <- sapply(1:K, function(k) {
-      pi0[, k] * dnorm(y, mean = z %*% beta[, k], sd = sigma[k])
+      pi_x[, k] * dnorm(y, mean = z %*% beta[, k], sd = sigma[k])
     })
     r_sum <- rowSums(r0)
     # Handle numerical issues: replace zeros with machine epsilon
@@ -359,7 +359,7 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
     
     # --- loglik with numerical stability ---
     loglik_components <- sapply(1:K, function(k) {
-      pi0[, k] * dnorm(y, mean = z %*% Beta1[, k], sd = sqrt(sigma21[k]))
+      pi_x[, k] * dnorm(y, mean = z %*% Beta1[, k], sd = sqrt(sigma21[k]))
     })
     loglik_sum <- rowSums(loglik_components)
     loglik_sum[loglik_sum == 0] <- .Machine$double.xmin  # Replace zeros
@@ -373,7 +373,7 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
     }
     
     beta <- Beta1
-    sigma0 <- sqrt(sigma21)
+    sigma <- sqrt(sigma21)
   }
   
   # Compute BIC
@@ -528,5 +528,6 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
            iterations = iter,AIC=AIC_val,BIC=BIC_val)
   return(out)
 }
+
 
 
