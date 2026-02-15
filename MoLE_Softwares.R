@@ -1,29 +1,7 @@
 library(mixtools)
 if(!require("nnet")){install.packages("nnet")}else{library(nnet)}
 
-###Initialization functions####
-initialise.kmeans=function(x,y,K){
-  # Initialization using k-means on (x,y)
-  km=kmeans(cbind(x, y), centers = K, nstart = 10)
-  # Initialize parameters using k-means on (x,y)
-  beta <- matrix(0, nrow = K, ncol = 2)  # intercept, slope
-  sigma <- numeric(K)
-  for (k in 1:K) {
-    idx <- which(km$cluster == k)
-    if (length(idx) > 1) {
-      lm_fit <- lm(y[idx] ~ x[idx])
-      coef_k <- coef(lm_fit)
-      beta[k, ] <- ifelse(is.na(coef_k), c(mean(y[idx]), 0), coef_k)
-      sigma[k] <- sqrt(mean(residuals(lm_fit)^2))
-    } else {
-      beta[k, ] <- c(mean(y), 0)
-      sigma[k] <- sd(y)
-    }
-    sigma[k] <- pmax(sigma[k], 1e-6)
-  }
-  return(list(beta0=beta,sigma0=sigma,pi0=rep(1/K,K)))
-}
-
+###Initialization function####
 initialise.random=function(x,y,K){
   # Initialization
   count=0
@@ -557,3 +535,4 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
            iterations = iter,AIC=AIC_val,BIC=BIC_val)
   return(out)
 }
+
