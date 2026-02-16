@@ -179,14 +179,13 @@ GMoLE.fit=function(x,y,k=NULL,init.pi=NULL,init.beta=NULL,init.sigma=NULL){
 
 ####CGMoLE####
 CGMoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FALSE,init.pi=NULL,init.beta=NULL,init.sigma=NULL,init.eta=NULL,init.alpha=NULL) {
-  stopifnot(K == 2)  # this implementation covers K=2 cleanly
   n <- length(y)
   X <- cbind(1, x)   # intercept + slope
   p=ncol(X)
   
   ## --- Initialization ---
   gamma <- matrix(0, nrow = p, ncol = K)
-  # regression coefficients (K x 2)
+  # regression coefficients (K x p)
   if(!is.null(init.beta)){beta=init.beta}else{beta=matrix(rnorm(K*p),p,K)}  # intercept, slope
   if(!is.null(init.sigma)){sigma=init.sigma}else{sigma=rgamma(k,1,1)}
   
@@ -199,7 +198,7 @@ CGMoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FALSE,
   v <- matrix(0, n, K)  # prob good within component
   loglik_prev <- -Inf
   
-  # helper: row-softmax via independent logits then normalize
+  #function for row-softmax via independent logits then normalize
   gating_probs <- function(gamma) {
     G <- matrix(0, n, K)
     for (k in 1:K) {
@@ -318,12 +317,12 @@ S_GMoLE.fit <- function(x, y, K = 2, max_iter = 500,init.pi=NULL,init.beta=NULL,
   t <- x
   
   # initialize
-  if(!is.null(init.pi)){pi_x=init.pi}else{pi_x=matrix(1/K,n,K)}
+   if(!is.null(init.pi)){init.pi=init.pi}else{init.pi=matrix(rep(1/K,K),n,K)}
   if(!is.null(init.beta)){beta=init.beta}else{beta=matrix(rnorm(K*p),p,K)}  # intercept, slope
   if(!is.null(init.sigma)){sigma=init.sigma}else{sigma=rgamma(k,1,1)}
   
   loglik_vec <- c()
-  
+  pi_x <- init.pi
   for (iter in 1:max_iter) {
     # --- E-step ---
     r0 <- sapply(1:K, function(k) {
@@ -406,7 +405,7 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
   p=ncol(X)
   
   # Initialize parameters
-  if(!is.null(init.pi)){init.pi=init.pi}else{init.pi=matrix(rep(1/K,K),n,K)}  # intercept, slope
+  if(!is.null(init.pi)){init.pi=init.pi}else{init.pi=matrix(rep(1/K,K),n,K)}
   if(!is.null(init.beta)){beta=init.beta}else{beta=matrix(rnorm(K*p),p,K)}  # intercept, slope
   if(!is.null(init.sigma)){sigma=init.sigma}else{sigma=rgamma(K,1,1)}
   
@@ -528,6 +527,7 @@ S_CG_MoLE.fit <- function(x, y, K = 2, max_iter = 500, tol = 1e-6, verbose = FAL
            iterations = iter,AIC=AIC_val,BIC=BIC_val)
   return(out)
 }
+
 
 
 
